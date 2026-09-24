@@ -1,0 +1,25 @@
+{
+  "name": "TNTT Châu Thủy",
+  "short_name": "TNTT Châu Thủy",
+  "description": "Phần mềm quản lý TNTT Châu Thủy - thành viên, điểm danh QR và thống kê.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fff9f7",
+  "theme_color": "#c91524",
+  "orientation": "portrait-primary",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
