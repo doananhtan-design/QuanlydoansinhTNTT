@@ -47,7 +47,13 @@ input,select,textarea{border-radius:13px!important;min-height:44px}
       <div class="field"><label>Mật khẩu</label><input id="p" class="login-input" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu"></div>
       <label class="showpass"><input id="showPass" type="checkbox" onchange="togglePass()"> Hiện mật khẩu</label>
       <button class="full login-btn" onclick="login()">ĐĂNG NHẬP</button>
-      <div id="lm" class="msg hidden"></div>
+      <div id="loginProgress" class="hidden" style="margin-top:10px">
+  <div id="loginProgressText" style="font-size:12px;font-weight:800;color:#c91524;text-align:center;margin-bottom:7px">Đang chuẩn bị...</div>
+  <div style="height:8px;background:#f1dddd;border-radius:99px;overflow:hidden">
+    <div id="loginProgressBar" style="height:100%;width:0;background:linear-gradient(90deg,#c91524,#ef3340);transition:width .25s"></div>
+  </div>
+</div>
+<div id="lm" class="msg hidden"></div>
       <div class="login-sub">Mật khẩu mặc định: <b>123456</b> • Có thể đổi mật khẩu sau khi đăng nhập</div>
     </div>
   </div>
@@ -129,7 +135,71 @@ async function call(fn,...args){
   });
 }function setLogo(){['logo','loginLogo'].forEach(id=>$(id).src=LOGO)}
 function togglePass(){const p=$('p');if(p)p.type=$('showPass')?.checked?'text':'password'}
-async function login(){try{const r=await call('login',{tenDangNhap:$('u').value,matKhau:$('p').value});token=r.token;sessionStorage.tnttToken=token;sessionStorage.tnttGreeting='';await start(r.user)}catch(e){$('lm').textContent=e.message||e;$('lm').classList.remove('hidden')}}async function start(user){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('bottom').classList.remove('hidden');setLogo();await refresh();if($('quickDoi'))$('quickDoi').classList.toggle('hidden',FD?.user?.VAI_TRO!=='TRUONG_NGANH');home()}async function auto(){const t=sessionStorage.getItem('tnttToken');if(!t){token='';return}try{token=t;await call('dashboard',token);await start(null)}catch(e){sessionStorage.removeItem('tnttToken');token=''}}const GREETINGS={TRUONG_NGANH:[
+function setLoginProgress(text,pct,error){
+  const box=$('loginProgress'), label=$('loginProgressText'), bar=$('loginProgressBar');
+  if(box)box.classList.remove('hidden');
+  if(label){label.textContent=text;label.style.color=error?'#c00000':'#c91524'}
+  if(bar){bar.style.width=Math.max(0,Math.min(100,pct))+'%';if(error)bar.style.background='#c00000'}
+}
+function setLoginBusy(busy){
+  const btn=document.querySelector('.login-btn');
+  const u=$('u'),p=$('p');
+  if(btn){btn.disabled=busy;btn.style.opacity=busy?'.65':'1';btn.textContent=busy?'ĐANG ĐĂNG NHẬP...':'ĐĂNG NHẬP'}
+  if(u)u.disabled=busy;if(p)p.disabled=busy;
+}
+async function login(){
+  const username=String($('u')?.value||'').trim();
+  const password=String($('p')?.value||'');
+  $('lm')?.classList.add('hidden');
+  if(!username||!password){
+    setLoginProgress('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.',0,true);
+    $('lm').textContent='Thiếu tên đăng nhập hoặc mật khẩu.';
+    $('lm').classList.remove('hidden');
+    return;
+  }
+  setLoginBusy(true);
+  try{
+    setLoginProgress('🔄 Đang khởi tạo kết nối máy chủ...',10);
+    await waitBridge();
+    setLoginProgress('🌐 Đã kết nối máy chủ. Đang kiểm tra tài khoản...',30);
+    const r=await call('login',{tenDangNhap:username,matKhau:password});
+    setLoginProgress('🔐 Xác thực thành công. Đang tạo phiên đăng nhập...',55);
+    if(!r||!r.token||!r.user)throw new Error('Máy chủ không trả về phiên đăng nhập hợp lệ.');
+    token=r.token;
+    sessionStorage.tnttToken=token;
+    sessionStorage.tnttGreeting='';
+    setLoginProgress('📥 Đăng nhập thành công. Đang tải dữ liệu...',75);
+    await start(r.user);
+    setLoginProgress('✅ Hoàn tất đăng nhập.',100);
+  }catch(e){
+    const msg=(e&&e.message)?e.message:String(e);
+    let friendly=msg;
+    if(/timeout|quá thời gian/i.test(msg)) friendly='Không nhận được phản hồi từ máy chủ. Kiểm tra kết nối mạng và URL Apps Script.';
+    else if(/BRIDGE_URL|PASTE_APPS_SCRIPT/i.test(msg)) friendly='Chưa cấu hình kết nối Apps Script cho PWA.';
+    else if(/PHIEN_DANG_NHAP|Sai tai khoan/i.test(msg)) friendly='Tên đăng nhập hoặc mật khẩu không đúng.';
+    setLoginProgress('❌ Đăng nhập thất bại: '+friendly,100,true);
+    $('lm').textContent='Chi tiết: '+msg;
+    $('lm').classList.remove('hidden');
+    console.error('[TNTT LOGIN]',e);
+  }finally{
+    setLoginBusy(false);
+  }
+}async function start(user){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('bottom').classList.remove('hidden');setLogo();await refresh();if($('quickDoi'))$('quickDoi').classList.toggle('hidden',FD?.user?.VAI_TRO!=='TRUONG_NGANH');home()}async function auto(){
+  const t=sessionStorage.getItem('tnttToken');
+  if(!t){token='';return}
+  try{
+    setLoginProgress('🔄 Đang kiểm tra phiên đăng nhập đã lưu...',25);
+    token=t;
+    await call('dashboard',token);
+    setLoginProgress('📥 Phiên hợp lệ. Đang tải dữ liệu...',70);
+    await start(null);
+    setLoginProgress('✅ Đã khôi phục phiên đăng nhập.',100);
+  }catch(e){
+    console.warn('[TNTT AUTO LOGIN]',e);
+    sessionStorage.removeItem('tnttToken');
+    token='';
+  }
+}const GREETINGS={TRUONG_NGANH:[
   'Chào Trưởng, chúc Trưởng luôn vui vẻ và tràn đầy năng lượng!',
   'Chào Trưởng, chúc Trưởng luôn nhiệt thành trong mọi hoạt động!',
   'Chào Trưởng, chúc Trưởng một ngày thật vui và nhiều niềm vui phục vụ!',
