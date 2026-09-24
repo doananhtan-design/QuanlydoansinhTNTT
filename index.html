@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#e60000"><title>TNTT Châu Thủy • v2.1.5</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#e60000"><title>TNTT Châu Thủy • v2.1.6</title>
 <script src="config.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://unpkg.com/html5-qrcode" defer></script>
 <style>
 :root{--red:#e60000;--red2:#ff2626;--red3:#b90000;--yellow:#ffe500;--cream:#fff8f5;--ink:#222;--muted:#777;--line:#f0dddd;--green:#18a957;--danger:#d71919;--shadow:0 8px 26px rgba(126,0,0,.12);--radius:20px}
@@ -41,7 +41,7 @@ input,select,textarea{border-radius:13px!important;min-height:44px}
   <div id="login" class="login-wrap">
     <div class="login-card">
       <img id="loginLogo" class="login-logo" alt="Logo TNTT">
-      <h1 class="login-title">TNTT CHÂU THỦY</h1><div class="app-version">TNTT Châu Thủy • v2.1.5</div>
+      <h1 class="login-title">TNTT CHÂU THỦY</h1><div class="app-version">TNTT Châu Thủy • v2.1.6</div>
       <div class="login-welcome">Chào mừng bạn đến với <b>phần mềm quản lý TNTT_Châu Thủy</b><br>Quản lý Đoàn sinh • Huynh trưởng • Điểm danh QR</div>
       <div class="field"><label>Tên đăng nhập</label><input id="u" class="login-input" autocomplete="username" placeholder="Nhập tên đăng nhập"></div>
       <div class="field"><label>Mật khẩu</label><input id="p" class="login-input" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu"></div>
@@ -55,7 +55,7 @@ input,select,textarea{border-radius:13px!important;min-height:44px}
     <header class="top">
       <div class="brand">
         <img id="logo" class="logo" alt="TNTT">
-        <div><div class="brand-title">TNTT VIỆT NAM</div><div class="brand-sub">Thiếu Nhi Thánh Thể</div><div class="brand-version">v2.1.5</div></div>
+        <div><div class="brand-title">TNTT VIỆT NAM</div><div class="brand-sub">Thiếu Nhi Thánh Thể</div><div class="brand-version">v2.1.6</div></div>
         <div class="hero-chibi">🧒🏻</div>
       </div>
     </header>
@@ -106,7 +106,7 @@ function ensureBridge(){
         for(let i=0;i<frames.length;i++)try{frames[i].postMessage(msg,'*')}catch(_){}
       }catch(_){}
     };
-    f.src=url+(url.includes('?')?'&':'?')+'bridge=1&v=2.1.5';
+    f.src=url+(url.includes('?')?'&':'?')+'bridge=1&v=2.1.6';
     document.body.appendChild(f);bridgeFrame=f;
   });
   return bridgeReadyPromise;
@@ -145,7 +145,10 @@ async function login(){
     if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='⏳ ĐANG ĐĂNG NHẬP...'}
     loginProgress('🔄 Đang khởi tạo kết nối máy chủ...');
     await ensureBridge();
-    loginProgress('🌐 Đã kết nối máy chủ. Đang kiểm tra tài khoản...');
+    loginProgress('🌐 Bridge đã kết nối. Đang kiểm tra google.script.run...');
+    const bt=await call('bridgeTest');
+    if(!bt||bt.ok!==true)throw new Error('Bridge test không trả kết quả hợp lệ');
+    loginProgress('⚙️ google.script.run hoạt động. Đang gọi máy chủ xác thực...');
     const r=await call('login',{tenDangNhap:u,matKhau:p});
     loginProgress('🔐 Xác thực thành công. Đang tạo phiên đăng nhập...');
     token=r.token;sessionStorage.tnttToken=token;sessionStorage.tnttGreeting='';
@@ -156,7 +159,10 @@ async function login(){
     $('lm').classList.add('hidden');
   }catch(e){
     const msg=String(e?.message||e||'Lỗi không xác định');
-    loginProgress(msg.includes('Sai tai khoan')||msg.includes('mật khẩu')?'❌ Tên đăng nhập hoặc mật khẩu không đúng.':'❌ Đăng nhập thất bại: '+msg,true);
+    const lower=msg.toLowerCase();
+    let out='❌ Đăng nhập thất bại: '+msg;
+    if(lower.includes('sai tai khoan')||lower.includes('sai tài khoản')||lower.includes('mật khẩu')) out='❌ Tên đăng nhập hoặc mật khẩu không đúng.';
+    loginProgress(out,true);
   }finally{
     if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'ĐĂNG NHẬP'}
   }
