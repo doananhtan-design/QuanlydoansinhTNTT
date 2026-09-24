@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><title>TNTT Bridge</title></head><body>
+<script>
+window.addEventListener('message',function(e){
+  var d=e.data||{};
+  if(d.type!=='TNTT_BRIDGE_CALL')return;
+  try{
+    var fn=d.fn,args=Array.isArray(d.args)?d.args:[];
+    if(!fn||typeof google==='undefined'||!google.script||!google.script.run)throw new Error('google.script.run không khả dụng');
+    google.script.run.withSuccessHandler(function(result){e.source.postMessage({type:'TNTT_BRIDGE_RESULT',id:d.id,ok:true,result:result},'*')}).withFailureHandler(function(err){e.source.postMessage({type:'TNTT_BRIDGE_RESULT',id:d.id,ok:false,error:String(err&&err.message||err)},'*')})[fn].apply(google.script.run,args);
+  }catch(err){e.source.postMessage({type:'TNTT_BRIDGE_RESULT',id:d.id,ok:false,error:String(err&&err.message||err)},'*')}
+});
+window.parent.postMessage({type:'TNTT_BRIDGE_READY'},'*');
+</script></body></html>

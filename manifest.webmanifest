@@ -1,15 +1,10 @@
 {
-  "name": "TNTT Châu Thủy",
-  "short_name": "TNTT Châu Thủy",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#c91524",
-  "orientation": "portrait",
-  "lang": "vi",
-  "version": "2.1.0",
-  "icons": [
-    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
-  ]
+  "name":"TNTT Châu Thủy",
+  "short_name":"TNTT Châu Thủy",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#ffffff",
+  "theme_color":"#b00020",
+  "lang":"vi",
+  "description":"Phần mềm quản lý TNTT Châu Thủy • v2.1.1"
 }
