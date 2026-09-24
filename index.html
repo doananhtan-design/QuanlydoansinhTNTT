@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#e60000"><title>TNTT Châu Thủy • v2.1.3</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#e60000"><title>TNTT Châu Thủy • v2.1.5</title>
 <script src="config.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="https://unpkg.com/html5-qrcode" defer></script>
 <style>
 :root{--red:#e60000;--red2:#ff2626;--red3:#b90000;--yellow:#ffe500;--cream:#fff8f5;--ink:#222;--muted:#777;--line:#f0dddd;--green:#18a957;--danger:#d71919;--shadow:0 8px 26px rgba(126,0,0,.12);--radius:20px}
@@ -41,7 +41,7 @@ input,select,textarea{border-radius:13px!important;min-height:44px}
   <div id="login" class="login-wrap">
     <div class="login-card">
       <img id="loginLogo" class="login-logo" alt="Logo TNTT">
-      <h1 class="login-title">TNTT CHÂU THỦY</h1><div class="app-version">TNTT Châu Thủy • v2.1.3</div>
+      <h1 class="login-title">TNTT CHÂU THỦY</h1><div class="app-version">TNTT Châu Thủy • v2.1.5</div>
       <div class="login-welcome">Chào mừng bạn đến với <b>phần mềm quản lý TNTT_Châu Thủy</b><br>Quản lý Đoàn sinh • Huynh trưởng • Điểm danh QR</div>
       <div class="field"><label>Tên đăng nhập</label><input id="u" class="login-input" autocomplete="username" placeholder="Nhập tên đăng nhập"></div>
       <div class="field"><label>Mật khẩu</label><input id="p" class="login-input" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu"></div>
@@ -55,7 +55,7 @@ input,select,textarea{border-radius:13px!important;min-height:44px}
     <header class="top">
       <div class="brand">
         <img id="logo" class="logo" alt="TNTT">
-        <div><div class="brand-title">TNTT VIỆT NAM</div><div class="brand-sub">Thiếu Nhi Thánh Thể</div><div class="brand-version">v2.1.3</div></div>
+        <div><div class="brand-title">TNTT VIỆT NAM</div><div class="brand-sub">Thiếu Nhi Thánh Thể</div><div class="brand-version">v2.1.5</div></div>
         <div class="hero-chibi">🧒🏻</div>
       </div>
     </header>
@@ -93,10 +93,20 @@ function ensureBridge(){
     const f=document.createElement('iframe');
     f.title='TNTT Apps Script Bridge';f.setAttribute('aria-hidden','true');
     f.style.cssText='position:fixed;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-10px;top:-10px';
-    const timer=setTimeout(()=>{window.removeEventListener('message',onReady);reject(new Error('Không kết nối được Bridge Apps Script. Hãy kiểm tra Deploy Web App và Bridge.html.'))},15000);
-    function onReady(e){if(e.data?.type!=='TNTT_BRIDGE_READY')return;clearTimeout(timer);window.removeEventListener('message',onReady);resolve();}
-    window.addEventListener('message',onReady);
-    f.src=url+(url.includes('?')?'&':'?')+'bridge=1&v=2.1.3';
+    let done=false;
+    const finish=()=>{if(done)return;done=true;clearTimeout(timer);window.removeEventListener('message',onMessage);resolve();};
+    const onMessage=e=>{const d=e.data||{};if(d.type==='TNTT_BRIDGE_READY'||d.type==='TNTT_BRIDGE_PONG')finish();};
+    const timer=setTimeout(()=>{window.removeEventListener('message',onMessage);reject(new Error('Không kết nối được Bridge Apps Script. Hãy kiểm tra Deploy Web App và Bridge.html.'))},15000);
+    window.addEventListener('message',onMessage);
+    f.onload=()=>{
+      const msg={type:'TNTT_BRIDGE_PING'};
+      try{f.contentWindow.postMessage(msg,'*')}catch(_){}
+      try{
+        const frames=f.contentWindow.frames;
+        for(let i=0;i<frames.length;i++)try{frames[i].postMessage(msg,'*')}catch(_){}
+      }catch(_){}
+    };
+    f.src=url+(url.includes('?')?'&':'?')+'bridge=1&v=2.1.5';
     document.body.appendChild(f);bridgeFrame=f;
   });
   return bridgeReadyPromise;
@@ -111,7 +121,14 @@ function bridgeCall(fn,...args){
   return ensureBridge().then(()=>new Promise((resolve,reject)=>{
     const id=++bridgeSeq;const timer=setTimeout(()=>{bridgePending.delete(id);reject(new Error('Apps Script không phản hồi sau 20 giây.'))},20000);
     bridgePending.set(id,{resolve,reject,timer});
-    try{bridgeFrame.contentWindow.postMessage({type:'TNTT_BRIDGE_CALL',id,fn,args},'*')}catch(e){clearTimeout(timer);bridgePending.delete(id);reject(e)}
+    try{
+      const msg={type:'TNTT_BRIDGE_CALL',id,fn,args};
+      try{bridgeFrame.contentWindow.postMessage(msg,'*')}catch(_){}
+      try{
+        const frames=bridgeFrame.contentWindow.frames;
+        for(let i=0;i<frames.length;i++)try{frames[i].postMessage(msg,'*')}catch(_){}
+      }catch(_){}
+    }catch(e){clearTimeout(timer);bridgePending.delete(id);reject(e)}
   }));
 }
 function call(fn,...args){
