@@ -1,9 +1,1 @@
-TNTT CHÂU THỦY - PWA
-=====================
-Chỉ chứa phần PWA:
-- index.html
-- manifest.webmanifest
-- sw.js
-
-Đưa 3 file này lên GitHub Pages/hosting HTTPS.
-PWA mở URL Apps Script /exec được cấu hình trong index.html.
+V2.3 FAST - PWA shell + cached assets. Upload the entire PWA folder to GitHub Pages/hosting. The shell automatically passes its own /assets URL to Apps Script, so no manual asset URL editing is needed.
