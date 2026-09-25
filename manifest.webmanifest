@@ -1,8 +1,9 @@
 {
+  "id": "./",
   "name": "TNTT Châu Thủy",
   "short_name": "TNTT Châu Thủy",
   "description": "Ứng dụng quản lý TNTT Châu Thủy",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

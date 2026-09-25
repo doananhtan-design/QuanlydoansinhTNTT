@@ -39,3 +39,6 @@ Sau khi cài, app chạy dạng `standalone`, có icon TNTT và không hiển th
 
 ## 5. Lưu ý
 PWA cài được như app nhưng dữ liệu vẫn online và phụ thuộc Google Apps Script/Google Sheet/Drive. Service Worker chỉ cache vỏ giao diện; chưa triển khai đồng bộ dữ liệu offline.
+
+
+V3.1 STABLE: network-first cho index.html; cache version tntt-chau-thuy-v3.1; luong auto-login khong an man hinh login khi refresh loi; co beforeinstallprompt.
