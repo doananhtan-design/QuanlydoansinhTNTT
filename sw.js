@@ -1,5 +1,6 @@
-const VERSION='tntt-chau-thuy-v3.1';
-const APP_SHELL=['./','./index.html','./manifest.webmanifest','./assets/logo.png','./assets/icon-192.png','./assets/icon-512.png','./assets/apple-touch-icon.png'];
+importScripts('./config.js');
+const VERSION='tntt-chau-thuy-v'+(self.TNTT_APP_VERSION||'3.2.0');
+const APP_SHELL=['./','./index.html','./config.js','./manifest.webmanifest','./assets/logo.png','./assets/icon-192.png','./assets/icon-512.png','./assets/apple-touch-icon.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));
 });

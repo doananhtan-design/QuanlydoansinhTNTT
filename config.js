@@ -1,2 +1,7 @@
-// TNTT Châu Thủy PWA v2.1.6
-window.TNTT_CONFIG={GAS_URL:'https://script.google.com/macros/s/AKfycbyAZ0BdDGRlEBVzNPlbtOlIAwwzRTYig-sbZiVe91LDtkt92O3G5VAzqrnouqigN4k/exec',APP_VERSION:'2.1.6'};
+/* =========================================================
+   TNTT CHÂU THỦY - VERSION CONFIG
+   Chỉ cần đổi APP_VERSION khi phát hành bản mới.
+   Ví dụ: 3.2.0 -> 3.2.1 -> 3.3.0
+   ========================================================= */
+var TNTT_APP_VERSION = '3.2.0';
+var TNTT_APP_VERSION_LABEL = 'V' + TNTT_APP_VERSION;
