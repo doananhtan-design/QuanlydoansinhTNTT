@@ -42,3 +42,5 @@ PWA cài được như app nhưng dữ liệu vẫn online và phụ thuộc Goo
 
 
 V3.1 STABLE: network-first cho index.html; cache version tntt-chau-thuy-v3.1; luong auto-login khong an man hinh login khi refresh loi; co beforeinstallprompt.
+
+V3.2.6: doPost returns HtmlService postMessage directly to hidden form/iframe; Cache polling remains fallback.
